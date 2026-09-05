@@ -40,7 +40,32 @@ Knowledge Compilation uses the skill format (SKILL.md + scripts, carried by harn
 
 ---
 
-## 3. Why "Compilation", Not "Distillation"
+## 3. Knowledge Compilation vs Traditional Rule Engines
+
+> "Isn't this just if-else — a rule engine from 40 years ago?"
+
+**if-then is its syntax, not its semantics.** All deterministic logic ultimately reduces to if-then, just as all neural networks are matrix multiplication. The question is what the if-then governs.
+
+| | Traditional rule engines (Drools / BRMS) | Follow, Don't Think |
+|---|---|---|
+| Purpose | Business automation: replace manual operations | Judgment replacement: replace the LLM's autonomous reasoning |
+| Operates on | Business data (orders, documents, flows) | Model behavior (actions, parameters, hallucinated intent) |
+| Rule source | Top-down: hand-written business specs | Bottom-up: distilled from verified successful cases, pitfalls, platform contracts |
+| Mechanism | One-shot: condition → execute action | Closed loop: check → intercept → inject rule → force regeneration → until compliant |
+| Failure assumption | Wrong rule → wrong execution | Model self-judgment WILL fail → lock boundaries with rules |
+
+Four deeper boundaries:
+
+1. **It prohibits how to think, not prescribes what to do** — mostly boundary prohibitions (red lines), not full-flow instructions. The model executes within the boundary but is forbidden to re-judge the boundary itself.
+2. **It is the execution tail of a three-layer pipeline, not a standalone rule list** — rules come from: expert tacit experience → distill/verify → package → compile → runtime interception. The if-then is the bytecode; the methodology is the pipeline that produces it.
+3. **It is a feedback loop coupled with LLM generation, not a one-shot gate** — a violation feeds the rule back into context and forces regeneration until compliant.
+4. **Its core proposition is "forbidden to think"** — a topic that never existed for rule engines (programs don't think). Facing LLMs that hallucinate and improvise, the question shifts from "how to make the model correct" to "how to make the model stop overthinking and just follow."
+
+Versus **guardrails libraries** (NeMo Guardrails, Guardrails AI): those bolt rules onto a *strong* model as an add-on guardrail; here, rules are the **compiled output of a knowledge pipeline** for a *weak* model — the guardrail is not an accessory, it is the product.
+
+---
+
+## 4. Why "Compilation", Not "Distillation"
 
 | | Knowledge Distillation | **Knowledge Compilation** |
 |---|---|---|
@@ -55,7 +80,7 @@ Distillation changes the model's "muscle memory"; compilation gives the model an
 
 ---
 
-## 4. Three-Layer Meta-Skill System (Distill → Package → Compile)
+## 5. Three-Layer Meta-Skill System (Distill → Package → Compile)
 
 ```
 knowledge-distillation   → Produce knowledge (thinker: analyze, verify, summarize, document pitfalls)
@@ -90,7 +115,7 @@ knowledge-compilation ★  → Consume knowledge (executor: just follow, don't t
 
 ---
 
-## 5. Knowledge Pack Structure (Compiled Knowledge Pack, Five Layers)
+## 6. Knowledge Pack Structure (Compiled Knowledge Pack, Five Layers)
 
 ```
 SKILL.md        → decision tree (direction) + hard rules (constraints) + verified checklist
@@ -114,7 +139,7 @@ Hard rules are the core of "compilation output": **write down the expert's judgm
 
 ---
 
-## 6. Relationship with the Harness
+## 7. Relationship with the Harness
 
 Knowledge Compilation is injected at **inference time** through an agent harness:
 - The harness provides the agent loop, tool protocol, and context management (infrastructure)
@@ -128,7 +153,7 @@ Layering principle:
 
 ---
 
-## 7. Validation & Evolution
+## 8. Validation & Evolution
 
 ### Decision Guidelines (When to Follow vs When to Innovate)
 
@@ -146,7 +171,7 @@ The knowledge-pack system moves toward **"more patterns → less reasoning requi
 
 ---
 
-## 8. Implementation Path
+## 9. Implementation Path
 
 1. **Distill**: extract knowledge from real practice (successful cases → decision rules → hard rules)
 2. **Package**: structure into portable knowledge packs (five-layer structure)
