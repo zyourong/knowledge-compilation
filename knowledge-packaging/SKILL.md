@@ -1,160 +1,160 @@
 ---
 name: knowledge-packaging
-description: 将一项已完成验证的专项能力（如网页操控、自动化流程、平台集成）打包成可迁移的知识包。当用户要求"把某个技能/能力整理成可迁移的知识"、"迁移到其他 agent"、"以后遇到同类问题能照着做"时使用。参考实例：knowledge/runninghub-web（RunningHub 网页操控打包）。
+description: Package a completed, verified specialized capability (e.g. web operation, automation flows, platform integration) into a portable knowledge pack. Use when the user asks to "organize a skill/capability into transferable knowledge", "migrate to another agent", or "be able to follow the same approach next time". Reference case: knowledge/runninghub-web (RunningHub web-operation packaging).
 ---
 
-# 知识打包流程（Knowledge Packaging）
+# Knowledge Packaging Process
 
-> **目的**：把"一项已完成、已实测验证的专项能力"变成**自包含的知识包**，任何 agent（包括推理能力较弱的）都能复制使用。
-> **核心原则**：文档要写到"笨 agent 照着做也不会错"——每个步骤有判定条件、成功/失败标准、可验证输出。
+> **Purpose**: turn "a completed, real-world-verified specialized capability" into a **self-contained knowledge pack** that any agent (including weak-reasoning ones) can pick up and use.
+> **Core principle**: write documentation until "a dumb agent following along can't go wrong" — every step has a decision criterion, success/failure standards, and verifiable output.
 
 ---
 
-## 一、输入检查（打包前先确认）
+## 1. Input Check (before packaging)
 
-| 检查项 | 方法 | 不满足怎么办 |
+| Check | Method | What if not satisfied |
 |---|---|---|
-| 能力已实测跑通 | 该能力有真实成功的运行记录 | 先跑通再打包，别打包半成品 |
-| 核心代码存在 | 有可审查的实现文件（Python/TS/脚本） | 先写代码 |
-| 有"踩过的坑"记录 | 实测中遇到过问题并解决 | 回顾过程，把坑写出来（最有价值） |
+| Capability verified in practice | The capability has real successful run records | Run it through first; never package a half-finished product |
+| Core code exists | Has inspectable implementation files (Python/TS/scripts) | Write the code first |
+| "Pitfalls hit" records exist | Problems encountered and solved in real use | Reconstruct the process and write the pitfalls (most valuable) |
 
-**打包的内容 = 代码 + 策略 + 实测结论 + 踩坑记录**，缺一不可。
+**Content of a pack = code + strategy + measured conclusions + pitfall records** — all required.
 
 ---
 
-## 二、确定知识包位置和结构
+## 2. Knowledge Pack Location and Structure
 
 ```
-knowledge/{能力名}/
-├── README.md          ← 迁移指南（怎么用、依赖、验证）
-├── SKILL.md           ← 技能本体（策略层：agent 读这个就知道怎么干）
-├── EXTENSION.md       ← 架构总结（工具↔命令对照、实现原理、迁移指南）
-├── {核心代码文件}      ← 代码副本（rh_browser.py 等，可审查）
-└── examples/          ← 正确示例（JSON 修改范例等）
+knowledge/{capability}/
+├── README.md          ← migration guide (how to use, dependencies, verification)
+├── SKILL.md           ← skill body (strategy layer: the agent reads this to know what to do)
+├── EXTENSION.md       ← architecture summary (tool↔command mapping, implementation principles, migration guide)
+├── {core code files}  ← code copies (rh_browser.py etc., inspectable)
+└── examples/          ← correct examples (JSON modification samples, etc.)
 ```
 
-**命名规则**：`knowledge/` 下按能力名建目录，小写连字符。
+**Naming**: create a directory per capability under `knowledge/`, lowercase with hyphens.
 
 ---
 
-## 三、编写 5 份文件的要点
+## 3. Writing the 5 Files
 
-### 3.1 README.md（迁移指南）—— 写给"要搬走的人"
+### 3.1 README.md (migration guide) — for "the person moving it"
 
-必须包含：
-1. **知识包结构说明**（每个文件干嘛的）
-2. **迁移 5 步骤**：携带哪些文件 → 装依赖 → 首次配置（如登录）→ 注册能力 → 验证闭环
-3. **核心事实速查表**（实测结论，不让读者重新踩坑）：
-   - URL、按钮文本、隐藏 iframe、状态判断逻辑
-   - 错误时的显示位置
-4. **命令总览表**（每个命令干嘛）
-5. **常见坑列表**（已踩过的，含表现和解法）
+Must include:
+1. **Knowledge pack structure** (what each file does)
+2. **5 migration steps**: which files to carry → install dependencies → first-time config (e.g. login) → register the capability → verification loop
+3. **Core fact quick-reference** (measured conclusions, so readers don't re-hit pitfalls):
+   - URLs, button texts, hidden iframes, state-detection logic
+   - Where errors are displayed
+4. **Command overview table** (what each command does)
+5. **Common pitfalls list** (already hit, with symptoms and fixes)
 
-### 3.2 SKILL.md（技能本体）—— 写给"要干活的 agent"
+### 3.2 SKILL.md (skill body) — for "the agent doing the work"
 
-**最重要的一份，要写最详细**。结构：
-1. **frontmatter**：`name` + `description`（描述写清楚"什么时候用"）
-2. **前置条件检查表**：每项检查 + 不满足怎么办
-3. **关键 URL/资源速查**
-4. **标准操作流程**：按场景分节（A 探查 / B 打开 / C 运行 / D 读报错 / E 提取结果 / F 改配置重跑）
-   - **每个场景必须有**：
-     - 具体命令
-     - 步骤序列（编号）
-     - ✅ 成功判定 / ❌ 失败判定
-     - 常见坑的规避方法
-5. **领域知识**（JSON 结构、关键规则、实战案例）
-6. **铁律**（违反会翻车的规则，编号列出）
-7. **已踩坑记录表**（坑 | 表现 | 解法）
-8. **验证清单**（操作后自检的 checkbox）
+**The most important file — write it in most detail.** Structure:
+1. **frontmatter**: `name` + `description` (description must state clearly "when to use")
+2. **Prerequisite check table**: each check + what to do if not satisfied
+3. **Key URL/resource quick-reference**
+4. **Standard operation flows**: organized by scenario (A explore / B open / C run / D read errors / E extract results / F change config & re-run)
+   - **Every scenario must have**:
+     - concrete commands
+     - numbered step sequence
+     - ✅ success criterion / ❌ failure criterion
+     - how to avoid common pitfalls
+5. **Domain knowledge** (JSON structure, key rules, real cases)
+6. **Hard rules** (rules whose violation breaks things, numbered)
+7. **Pitfall log table** (pitfall | symptom | fix)
+8. **Verification checklist** (post-operation self-check checkboxes)
 
-**写作要求**：
-- 步骤细到"先做 X，看结果，如果是 Y 再做 Z"
-- 不依赖读者的推理能力——把"看似明显"的判断都写出来
-- 每个命令给真实示例，不写伪代码
+**Writing requirements**:
+- Steps detailed to "do X first, look at the result, if Y then do Z"
+- Don't rely on reader reasoning — write out everything that seems "obvious"
+- Give real command examples, never pseudocode
 
-### 3.3 EXTENSION.md（架构总结）—— 写给"要移植的人"
+### 3.3 EXTENSION.md (architecture summary) — for "the person porting it"
 
-1. **架构分层图**（策略层 / 封装层 / 实现层）
-2. **工具 ↔ 命令对照表**（每个工具的调用方式）
-3. **实现原理**（核心函数怎么工作，如转发函数）
-4. **核心实现要点**（迁移时不能丢的细节，如登录态保存、隐藏 input 注入）
-5. **环境依赖**
-6. **迁移到其他 agent 的 3 种场景**：
-   - 支持自定义工具（pi）→ 注册工具
-   - 只有 bash → 直接调命令
-   - 非 Python → 移植逻辑
+1. **Architecture layering diagram** (strategy layer / wrapper layer / implementation layer)
+2. **Tool ↔ command mapping table** (how each tool is invoked)
+3. **Implementation principles** (how core functions work, e.g. the forwarding function)
+4. **Core implementation points** (details that must not be lost when migrating, e.g. login-state persistence, hidden input injection)
+5. **Environment dependencies**
+6. **3 migration scenarios to other agents**:
+   - Supports custom tools (pi) → register tools
+   - bash only → call commands directly
+   - Non-Python → port the logic
 
-### 3.4 代码副本
+### 3.4 Code copies
 
-- 把核心实现文件复制进知识包（保持与运行环境一致）
-- **改代码后必须同步副本**（用 `cp` 覆盖）
+- Copy core implementation files into the pack (keep consistent with the runtime environment)
+- **After changing code, must sync the copy** (overwrite with `cp`)
 
-### 3.5 examples/（正确示例）
+### 3.5 examples/ (correct examples)
 
-- 放"正确做法"的实例文件（如修改好的 JSON）
-- **必须用正确方法**：如果中途发现过错误做法，把"错 vs 对"对照写进 SKILL.md，但 examples 只放对的
+- Put "correct approach" instance files (e.g. a fixed JSON)
+- **Must use the correct method**: if a wrong approach was discovered midway, write the "wrong vs right" comparison into SKILL.md — but examples only contain the right ones
 
 ---
 
-## 四、同步到 pi 技能目录
+## 4. Sync to the pi Skills Directory
 
-知识包写好后，**同步到 pi 实际加载的位置**：
+After writing the pack, **sync to the location pi actually loads**:
 
 ```bash
-cp knowledge/{能力名}/SKILL.md .pi/skills/{能力名}/SKILL.md
+cp knowledge/{capability}/SKILL.md .pi/skills/{capability}/SKILL.md
 ```
 
-- `.pi/skills/` 是 pi 自动发现技能的目录
-- **必须保持一致**：改知识包后重新 cp
+- `.pi/skills/` is the directory where pi auto-discovers skills
+- **Must stay consistent**: re-cp after changing the pack
 
 ---
 
-## 五、验证（打包完必做）
+## 5. Verification (required after packaging)
 
-| 验证项 | 命令 | 通过标准 |
+| Verification | Command | Pass criterion |
 |---|---|---|
-| 代码语法 | `python -m py_compile {代码文件}` | 无报错 |
-| 副本一致 | `diff -q knowledge/{能力名}/{代码} .pi/scripts/{代码}` | 无差异 |
-| 文档一致 | `diff -q knowledge/{能力名}/SKILL.md .pi/skills/{能力名}/SKILL.md` | 无差异 |
-| pi 能加载 | `pi -p "回复：正常"` | 正常回复且无扩展报错 |
-| 知识包结构 | `find knowledge/{能力名} -type f` | 5 类文件齐全 |
+| Code syntax | `python -m py_compile {code file}` | No errors |
+| Copy consistency | `diff -q knowledge/{capability}/{code} .pi/scripts/{code}` | No differences |
+| Doc consistency | `diff -q knowledge/{capability}/SKILL.md .pi/skills/{capability}/SKILL.md` | No differences |
+| pi loads it | `pi -p "回复：正常"` | Normal reply, no extension errors |
+| Pack structure | `find knowledge/{capability} -type f` | All 5 file types present |
 
 ---
 
-## 六、打包时最容易犯的错（对照自查）
+## 6. Most Common Packaging Mistakes (self-check)
 
-| # | 错误 | 正确做法 |
+| # | Mistake | Correct approach |
 |---|---|---|
-| 1 | 文档写得太简略，依赖读者推理 | 写到"笨 agent 照着做也不会错"，每步给判定条件 |
-| 2 | 只打包代码，不打包"实测坑" | 踩坑记录是最高价值资产，必须写入 |
-| 3 | 步骤用"伪代码/抽象描述" | 给真实命令、真实输出示例 |
-| 4 | 概念混淆（如"停用=断线"） | 发现概念错误后，在 SKILL.md 里写"错 vs 对"对照 |
-| 5 | 改代码后忘记同步知识包副本 | 每次改代码立即 `cp` 同步 |
-| 6 | examples 里放了错误做法 | examples 只放正确实例 |
+| 1 | Docs too terse, relying on reader reasoning | Write until "a dumb agent following along can't go wrong"; give decision criteria at every step |
+| 2 | Only packaging code, not the "measured pitfalls" | Pitfall records are the highest-value asset; must be included |
+| 3 | Steps use "pseudocode/abstract descriptions" | Give real commands and real output examples |
+| 4 | Conceptual confusion (e.g. "disable = disconnect") | After finding a conceptual error, write the "wrong vs right" comparison in SKILL.md |
+| 5 | Forgetting to sync the pack copy after code changes | `cp` sync immediately after every code change |
+| 6 | examples containing wrong approaches | examples only contain correct instances |
 
 ---
 
-## 七、参考实例（本次 RunningHub 打包）
+## 7. Reference Case (the RunningHub packaging)
 
-**已完成的知识包**：`knowledge/runninghub-web/`
+**Completed pack**: `knowledge/runninghub-web/`
 - README.md → SKILL.md → EXTENSION.md → rh_browser.py → rh-browser.ts → examples/lora_fixed_0.9_mode.json
 
-**当时踩的关键坑**（写进了文档）：
-1. 报错在 iframe 而非外层页面
-2. 任务状态判断必须按最新 taskid 过滤（历史失败任务会干扰）
-3. "停用 ≠ 断线"：停用节点用 mode=4 静音，不是删 links
-4. 运行按钮 20-30 秒才出现，要轮询等待
+**Key pitfalls hit at the time** (written into the docs):
+1. Errors appear in the iframe, not the outer page
+2. Task-status detection must filter by the latest taskid (historical failed tasks interfere)
+3. "Disable ≠ disconnect": disable a node with mode=4 (mute), not by deleting links
+4. The run button takes 20-30 seconds to appear; poll and wait
 
-遇到新的"打包知识"任务时，先读 `knowledge/runninghub-web/` 作为范例，再按本技能流程操作。
+When facing a new "packaging knowledge" task, first read `knowledge/runninghub-web/` as a reference case, then follow this skill's process.
 
-## 验证清单
+## Verification Checklist
 
-- [ ] 输入检查过了（能力已实测、代码存在）？
-- [ ] 知识包目录结构齐全（5 类文件）？
-- [ ] README 有迁移步骤 + 核心事实表 + 常见坑？
-- [ ] SKILL.md 每个场景有✅/❌判定 + 真实命令？
-- [ ] EXTENSION.md 有工具↔命令对照 + 3 场景迁移指南？
-- [ ] 代码副本同步且语法正确？
-- [ ] examples 只含正确做法？
-- [ ] 已同步到 .pi/skills/ 且与知识包一致？
-- [ ] pi 加载验证通过？
+- [ ] Input check passed (capability verified, code exists)?
+- [ ] Pack directory structure complete (5 file types)?
+- [ ] README has migration steps + core fact table + common pitfalls?
+- [ ] SKILL.md has ✅/❌ criteria + real commands for every scenario?
+- [ ] EXTENSION.md has tool↔command mapping + 3-scenario migration guide?
+- [ ] Code copy synced and syntactically correct?
+- [ ] examples contains only correct approaches?
+- [ ] Synced to .pi/skills/ and consistent with the pack?
+- [ ] pi load verification passed?
