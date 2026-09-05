@@ -1,150 +1,149 @@
-# Knowledge Compilation（知识编译）
+# Knowledge Compilation
 
-> **把专家的隐性经验编译成确定性、可执行的规则，让推理能力弱的开源小模型也能零成本执行专家任务——不训练、不蒸馏、可审计。**
-
----
-
-## 一句话定位
-
-在 AI 生成时代，**生成在快速商品化，判断力不会商品化**。本项目提出的 **Knowledge Compilation** 是一种面向"弱模型消费"的知识工程方法论：把专家的隐性推理（判定条件、成功/失败标准、if-then 流程）编译成决策树 + 铁律 + 已验证清单的确定性框架，通过 agent harness 在**推理期**注入给开源小模型。
-
-模型不需要变聪明——**框架替它聪明**。
+> **Compile expert tacit experience into deterministic, executable rules, so that weak open-source models can perform expert tasks at near-zero cost — no training, no distillation, fully auditable.**
 
 ---
 
-## 为什么叫"编译"，不叫"蒸馏"？
+## One-Line Positioning
 
-| | Knowledge Distillation（知识蒸馏） | **Knowledge Compilation（知识编译）** |
+In the era of AI generation, **generation is commoditizing fast; judgment is not.** This project proposes **Knowledge Compilation** — a knowledge-engineering methodology designed for *weak-model consumption*: compile an expert's tacit reasoning (decision criteria, success/failure standards, if-then flows) into a deterministic framework of decision trees + hard rules + verified checklists, then inject it at **inference time** through an agent harness into an open-source small model.
+
+The model doesn't need to get smarter — **the framework thinks for it.**
+
+---
+
+## Why "Compilation", Not "Distillation"?
+
+| | Knowledge Distillation | **Knowledge Compilation** |
 |---|---|---|
-| 时机 | 训练期 | 推理期 |
-| 方式 | 用大模型输出**训练/微调**小模型权重 | 把经验编译成**确定性规则框架**注入上下文 |
-| 成本 | 训练成本（GPU、数据、时间） | 零训练成本，纯文档 + 注入 |
-| 可审计性 | 黑盒（权重不可审查） | 白盒（规则、铁律、清单逐条可审查） |
-| 可迁移性 | 每个模型要重新训练 | 同一知识包跨模型、跨 harness 复用 |
-| 适用 | 通用能力迁移 | **领域经验迁移 + 任务降本** |
+| Phase | Training time | Inference time |
+| Method | Train/fine-tune small model weights with large model outputs | Compile experience into deterministic rule frameworks injected into context |
+| Cost | Training cost (GPU, data, time) | Zero training cost — docs + injection only |
+| Auditability | Black box (weights not inspectable) | White box (every rule, hard-rule and checklist is auditable) |
+| Portability | Retrain per model | Same knowledge pack reused across models and harnesses |
+| Applicability | General capability transfer | **Domain experience transfer + task cost reduction** |
 
-蒸馏改的是模型的"肌肉记忆"，编译给的是模型的"操作规程"。蒸馏是"教它学会"，编译是"替它想好"。
+Distillation changes the model's "muscle memory"; compilation gives the model an "operating manual". Distillation is *teaching it to learn*; compilation is *thinking for it*.
 
 ---
 
-## 为什么是降本增效的杀器：编译 × 蒸馏
+## Why It's the Biggest Cost-Reduction Lever: Compilation × Distillation
 
-**知识编译 + 知识蒸馏，是领域任务降本增效的最大组合拳。**
+**Knowledge Compilation + Knowledge Distillation = the strongest combination for cutting costs in domain tasks.**
 
-| | 蒸馏（训练期） | 编译（推理期） |
+| | Distillation (training) | Compilation (inference) |
 |---|---|---|
-| 解决什么 | **"不会想"**——小模型的基础能力 | **"不知道"**——小模型的领域经验 |
-| 谁做 | 模型厂商（DeepSeek/Phi 等） | 应用层（本仓库） |
-| 成本 | 一次性训练成本，摊薄后便宜 | 零训练成本，持续复用 |
-| 产出 | 有通用能力的小模型 | 能干专家活的确定性框架 |
+| Solves | **"Can't think"** — small model's baseline capability | **"Doesn't know"** — small model's domain experience |
+| Done by | Model vendors (DeepSeek, Phi, etc.) | Application layer (this repo) |
+| Cost | One-time training cost, amortized | Zero training cost, reused continuously |
+| Output | Small models with general capability | Deterministic frameworks that can do expert work |
 
-- **只蒸馏**：小模型有基础能力，但不懂你的领域——照样干不了专家的活
-- **只编译**：模型太笨连基础能力都没有——知识补"不知道"，补不了"不会想"
-- **蒸馏 + 编译**：小模型的地基（会想）+ 专家的领域判断（知道）= **用小模型的成本，获得"强模型的推理 + 专家的领域"**
+- **Distillation alone**: the small model has baseline capability but no domain knowledge — still can't do an expert's job
+- **Compilation alone**: the model is too weak even at baseline — knowledge fills "doesn't know" but not "can't think"
+- **Compilation × Distillation**: small model foundation (can think) + expert domain judgment (knows) = **small-model cost, with strong-model reasoning plus expert domain expertise**
 
-模型厂商负责把"会想"变便宜（蒸馏），本仓库负责把"知道"变便宜（编译）。两者结合，一个需要资深专家的任务，可以降到用开源小模型 + 知识包执行——**成本差 10-100 倍**。
+Model vendors make "thinking" cheap (distillation); this repo makes "knowing" cheap (compilation). Together, a task that needs a senior expert can run on an open-source small model plus a knowledge pack — **10-100x cost difference**.
 
-> 边界：组合拳适用于**知识密集、推理稀薄**的任务（评测、规则执行、流程操作、质检判断）；真正需要开放推理的任务（创意策划、复杂规划、长链推理）仍需强模型。
-
----
-
-## 核心洞察（三个）
-
-### 1. 推理负担转移（Inference Offloading）
-专家的隐性知识 → 编译成判定条件、成功/失败标准、每一步 if-then 写死 → **agent 只需要执行，不需要思考**。
-这不是"教" agent，是"替" agent 推理。
-
-### 2. 面向弱模型的消费哲学
-主流知识框架（Claude Code skills、DSPy）是给**旗舰模型**用的：知识是"参考"，模型自己会思考。
-本项目是**反向设计**：知识框架的目标消费者是"笨模型"，所以结构必须傻瓜化到——
-**决策树定方向、铁律挡错误、已验证清单免推理、元技能强制"直接照做，别思考"。**
-
-### 3. 成本套利（用文档复杂度换取模型能力需求）
-因为知识包够"笨"、够确定，推理弱的开源模型（便宜 10-100 倍）也能干同样的活。
-**知识越完整 → 需要的推理越少 → 可用越便宜的模型。**
+> Boundary: the combination applies to **knowledge-dense, reasoning-thin** tasks (evaluation, rule execution, process operation, QC judgment). Tasks requiring open-ended reasoning (creative planning, complex planning, long-chain reasoning) still need strong models.
 
 ---
 
-## 三层元技能体系（蒸馏 → 打包 → 编译 闭环）
+## Core Insights
+
+### 1. Inference Offloading
+An expert's tacit knowledge → compiled into decision criteria, success/failure standards, and step-by-step if-then rules → **the agent only executes, never thinks**.
+This is not "teaching" an agent; it's "reasoning for" the agent.
+
+### 2. A Consumption Philosophy Designed for Weak Models
+Mainstream knowledge frameworks (Claude Code skills, DSPy) target **flagship models**: knowledge is a "reference" and the model still thinks for itself.
+This project is the **reverse design**: the knowledge framework's target consumer is a "dumb" model, so the structure must be foolproof —
+**decision trees set direction, hard rules block errors, verified checklists remove reasoning, and the meta-skill enforces "just follow, don't think."**
+
+### 3. Cost Arbitrage (Trade Document Complexity for Model Capability)
+Because the knowledge pack is "dumb" enough and deterministic, weaker open-source models (10-100x cheaper) can do the same job.
+**The more complete the knowledge → the less reasoning required → the cheaper the model you can use.**
+
+---
+
+## Three-Layer Meta-Skill System (Distill → Package → Compile)
 
 ```
-knowledge-distillation（蒸馏）   → 生产知识（思考者：分析、验证、总结、写坑）
-knowledge-packaging（打包）      → 封装知识（整理者：组织成可迁移的知识包）
-knowledge-compilation（编译）★   → 消费知识（执行者：直接照做，别思考）
+knowledge-distillation   → Produce knowledge (thinker: analyze, verify, summarize, document pitfalls)
+knowledge-packaging      → Package knowledge (organizer: structure into portable packs)
+knowledge-compilation ★  → Consume knowledge (executor: just follow, don't think)
 ```
 
-编译元技能的第一规则：**"直接用，笨一点（Follow, Don't Think）"**——知识包是已验证的结论，消费时唯一职责是忠实执行，不是重新验证。聪明用在生产知识时（蒸馏），不用在消费知识时（执行）。
+The first rule of compilation: **"Follow, Don't Think."** A knowledge pack is a verified conclusion; when consuming it, your only job is faithful execution, not re-verification. Be smart when *producing* knowledge (distillation), not when *consuming* it (execution).
 
-### 为什么"笨"反而高效
+### Why "Dumb" Is More Efficient
 
-| 行为 | 结果 |
+| Behavior | Result |
 |---|---|
-| 照做（笨） | ✅ 复现已验证的成功 |
-| 自作聪明（聪明） | ❌ 破坏已验证的流程，踩新坑 |
+| Follow (dumb) | ✅ Reproduces verified success |
+| Improvise (clever) | ❌ Breaks verified flows, hits new pitfalls |
 
-一个"笨 agent 照着做不会错"的知识包，是最高质量的交付物。
-
----
-
-## 知识包的结构（五层）
-
-一个编译知识包（Compiled Knowledge Pack）包含五层结构：
-
-```
-SKILL.md          → 决策树（先定方向）+ 铁律（硬约束）+ 已验证清单
-pipelines.md      → 已验证管线（可复用的端到端流程）
-components.md     → 可复用组件（循环、模板、工具）
-nodes.md          → 实测值（参数语义、跨体系陷阱、踩坑记录）
-可执行脚本         → 与文档配套的真实代码（工具层）
-```
-
-示例见 `runninghub-nodes/`（RunningHub 工作流节点编辑知识包）与 `runninghub-web/`（网页操控知识包，含 25KB 可执行 Python 脚本）。
+A knowledge pack that a "dumb" agent can follow without error is the highest-quality deliverable.
 
 ---
 
-## 创新点（组合空白）
+## Knowledge Pack Structure (Five Layers)
 
-**所有零件都是公开技术**：
+A Compiled Knowledge Pack contains five layers:
 
 ```
-以"成功经验"为真值逆向私有平台契约（把跑通的 JSON 当 API 文档）
-    → 编译成确定性知识包（决策树+铁律+清单）
-    → 推理期注入给开源小模型（零训练成本）
-    → 配统计评测验证迁移效果（知识密度 vs 推理密度）
+SKILL.md        → decision tree (direction) + hard rules (constraints) + verified checklist
+pipelines.md    → verified end-to-end pipelines
+components.md   → reusable components (loops, templates, tools)
+nodes.md        → measured values (parameter semantics, cross-system pitfalls, pitfalls log)
+executable code → real scripts paired with the docs (tool layer)
 ```
 
-业界现状对比：
-- Anthropic/OpenAI 的 skills 体系：说明书给**顶级模型**用（默认你买贵的）
-- 开源模型降本：靠**更强的推理/更好的模型**，不是靠更好的说明书
-- 逆向工程：在**代码层**做，没人把"跑通的工作流"当文档逆向
-
-**"以成功案例为真值、编译确定性说明书、把推理需求压到开源模型"——这个组合是空白。**
+See `runninghub-nodes/` (workflow node-editing knowledge pack) and `runninghub-web/` (web-operation knowledge pack, including a 25KB executable Python script).
 
 ---
 
-## 仓库内容
+## Innovation (The Combination Gap)
+
+**All parts are public technology** — but the following end-to-end loop has no mature open-source implementation:
 
 ```
-knowledge-compilation/    编译元技能（消费知识的第一规则）
-knowledge-distillation/   蒸馏元技能（生产知识）
-knowledge-packaging/      打包元技能（封装知识）
-runninghub-nodes/         Compiled Knowledge Pack 示例①：RunningHub 工作流节点编辑
-runninghub-web/           Compiled Knowledge Pack 示例②：RunningHub 网页操控（含可执行脚本）
-agent架构方案.md          知识编译架构设计文档
+Use "successful experience" as ground truth to reverse-engineer private platform contracts
+    → compile into deterministic knowledge packs (decision trees + hard rules + checklists)
+    → inject at inference time into open-source small models (zero training cost)
+    → validate transfer effects with statistical evaluation (knowledge density vs reasoning density)
+```
+
+Industry status quo:
+- Anthropic/OpenAI skills systems: manuals are for **flagship models** (they assume you pay for the expensive ones)
+- Open-source cost reduction: relies on **better reasoning / stronger models**, not better manuals
+- Reverse engineering: done at the **code level** — nobody treats "working workflows" as documentation to reverse
+
+**"Successful cases as ground truth, compile deterministic manuals, push the reasoning burden onto open-source models" — this combination is a gap.**
+
+---
+
+## Repository Contents
+
+```
+knowledge-compilation/     Compilation meta-skill (first rule for consuming knowledge)
+knowledge-distillation/    Distillation meta-skill (producing knowledge)
+knowledge-packaging/       Packaging meta-skill (packaging knowledge)
+runninghub-nodes/          Compiled Knowledge Pack ①: RunningHub workflow node editing
+runninghub-web/            Compiled Knowledge Pack ②: RunningHub web operation (with executable script)
+agent-architecture.md      Knowledge Compilation architecture design document
 ```
 
 ---
 
-## 路线图
+## Roadmap
 
-- [x] 知识编译方法论 + 两个 Compiled Knowledge Pack（nodes / web）
-- [ ] **对照实验**：同一任务，弱模型+知识包 vs 强模型裸跑——量化"成本差 vs 质量差"
-- [ ] **统计验证框架**：用统计方法验证知识包迁移效果（知识密度 vs 推理密度 → 该不该编译）
-- [ ] **第三个 Knowledge Pack**：覆盖新领域，验证方法论的可复制性
+- [x] Knowledge Compilation methodology + two Compiled Knowledge Packs (nodes / web)
+- [ ] **Controlled experiment**: same task, weak model + knowledge pack vs strong model bare — quantify "cost difference vs quality difference"
+- [ ] **Statistical validation framework**: knowledge density vs reasoning density → decide what should be compiled; verify transfer effects statistically
+- [ ] **Third Knowledge Pack**: cover a new domain to prove the methodology is reproducible
 
 ---
 
 ## License
 
 MIT
-
