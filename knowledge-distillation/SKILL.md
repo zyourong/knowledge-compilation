@@ -1,138 +1,138 @@
 ---
 name: knowledge-distillation
-description: 从原始数据/实战记录中提炼结构化知识（知识蒸馏）。当用户要求"从一堆成功的工作流/数据中总结出规则"、"把某平台的节点/操作契约提取成可复用知识"、"以后遇到同类问题能照着做"时使用。与 knowledge-packaging 的区别：packaging 是把"已存在的能力"打包成可迁移格式；distillation 是从"原始数据"提炼出"之前不存在的知识"。参考实例：knowledge/runninghub-nodes（从 6 个工作流 JSON 提炼节点编辑知识）。
+description: Extract structured knowledge from raw data / real-world practice records (knowledge distillation). Use when the user asks to "summarize rules from a pile of successful workflows/data", "extract a platform's node/operation contracts into reusable knowledge", or "be able to follow the same approach next time". Difference from knowledge-packaging: packaging turns "an existing capability" into a portable format; distillation derives "knowledge that didn't exist before" from "raw data". Reference case: knowledge/runninghub-nodes (node-editing knowledge distilled from 6 workflow JSONs).
 ---
 
-# 知识蒸馏流程（Knowledge Distillation）
+# Knowledge Distillation Process
 
-> **目的**：从原始数据（成功案例、工作流 JSON、操作记录）中**提炼出结构化的领域知识**，让 agent 以后做同类任务时不用重新摸索。
-> **核心原则**：知识必须来自**已验证的真值**（跑通的案例），且结构**极简**——提炼，不复制。
-> **与 packaging 的分工**：packaging 处理"已有能力→可迁移包"；distillation 处理"原始数据→领域知识"。
+> **Purpose**: extract **structured domain knowledge** from raw data (successful cases, workflow JSONs, operation logs), so agents don't have to re-discover it next time.
+> **Core principle**: knowledge must come from **verified ground truth** (cases that actually ran successfully), and the structure must be **minimal** — distill, don't copy.
+> **Division of labor with packaging**: packaging handles "existing capability → portable pack"; distillation handles "raw data → domain knowledge".
 
 ---
 
-## 一、输入检查（蒸馏前先确认）
+## 1. Input Check (before distilling)
 
-| 检查项 | 方法 | 不满足怎么办 |
+| Check | Method | What if not satisfied |
 |---|---|---|
-| 有多个成功样本 | 至少 2 个已验证案例（越多模式越清晰） | 先跑通积累样本，别从单个案例过度泛化 |
-| 样本可解析 | 能读取结构（JSON/日志/记录） | 先写解析脚本 |
-| 有失败记录 | 跑通过程中踩过的坑 | 回顾补上（坑是最有价值的蒸馏产物） |
+| Multiple success samples | At least 2 verified cases (more samples → clearer patterns) | Run more cases first; don't over-generalize from a single case |
+| Samples are parseable | Structure can be read (JSON/logs/records) | Write a parsing script first |
+| Failure records exist | Pitfalls hit during successful runs | Reconstruct them (pitfalls are the most valuable distillation output) |
 
-**蒸馏的输入 = 原始数据 + 实战经验**，缺一不可。
-
----
-
-## 二、蒸馏五步法（从数据到知识）
-
-### 第 1 步：统计盘点（先看全貌，不急着分类）
-
-- 统计样本中所有实体的**类型 + 出现频率**（如节点类型分布）
-- 找出高频实体和一次性实体（高频=核心，一次性=边缘）
-
-### 第 2 步：提取拓扑（谁连谁，链路优先于节点）
-
-- 分析**连接关系**而非孤立实体：每个实体的输入来源/输出去向
-- 关键结论：**实体不独立存在**，必须按链路组装才有意义
-- 找出重复出现的"链路片段"（= 候选组件）
-
-### 第 3 步：识别体系（按"能力/生态"聚类，不是按任务）
-
-- 找出样本中的**生态单元**：每个单元 = 一套绑定的组件组合
-  - 例：底模 → 专属 CLIP/VAE/采样器/ControlNet/Lora
-- **体系按能力分类**（编辑/生成/引导），**不按任务分类**
-- ⚠️ 最容易犯的错：把"已验证场景"写成"唯一用途"（见第六节#1）
-
-### 第 4 步：提炼组件（跨体系复用的公共模块）
-
-- 在体系之上，找**跨体系可复用**的流程模块
-- 每个组件记录：功能 + 节点构成 + 焊接点（接入位置）+ 已验证来源
-
-### 第 5 步：定义边界（铁律 = 安全的红线）
-
-- 从踩坑中提炼"什么不能做"（跨体系混用、未验证组合、参数顺序）
-- 铁律是知识的负空间——没有铁律，agent 会发明危险组合
+**Input to distillation = raw data + real-world experience** — both are required.
 
 ---
 
-## 三、极简结构（蒸馏产物的组织形式）
+## 2. The Five-Step Distillation Method (from data to knowledge)
 
-**核心原则：知识包只存提炼过的知识，原始数据不复制，需要时直接读原文件。**
+### Step 1: Statistical inventory (see the whole picture first, don't classify yet)
+
+- Count **type + frequency** of all entities in the samples (e.g. node type distribution)
+- Identify high-frequency entities vs one-off entities (high-frequency = core, one-off = edge)
+
+### Step 2: Extract topology (who connects to whom; chains before nodes)
+
+- Analyze **connections** rather than isolated entities: each entity's input sources / output destinations
+- Key conclusion: **entities don't exist independently** — they only make sense assembled into chains
+- Find recurring "chain fragments" (= candidate components)
+
+### Step 3: Identify systems (cluster by "capability/ecosystem", not by task)
+
+- Find **ecosystem units** in the samples: each unit = one bound set of components
+  - e.g. base model → its dedicated CLIP/VAE/sampler/ControlNet/LoRA
+- **Classify systems by capability** (edit/generate/guide), **not by task**
+- ⚠️ Most common mistake: writing "verified scenario" as "the only use" (see §6 #1)
+
+### Step 4: Distill components (public modules reusable across systems)
+
+- On top of systems, find **cross-system reusable** process modules
+- For each component record: function + node composition + wiring points (where it connects) + verified source
+
+### Step 5: Define boundaries (hard rules = safe red lines)
+
+- Extract "what must not be done" from pitfalls (cross-system mixing, unverified combinations, parameter order)
+- Hard rules are the negative space of knowledge — without them, agents invent dangerous combinations
+
+---
+
+## 3. Minimal Structure (organizing distillation output)
+
+**Core principle: knowledge packs store only distilled knowledge; raw data is not copied — read the original files when needed.**
 
 ```
-knowledge/{领域名}/
-├── SKILL.md        ← 入口：决策树 + 体系表 + 铁律 + 流程 + 已验证清单（一页）
-├── {体系/接线}.md  ← 体系知识：每个体系 15 行内（专属组件+接线+可调参数）
-├── {组件/方法}.md  ← 组件知识：每个组件 8 行内（功能+焊接点+先例）
-└── {契约/细节}.md  ← 按需查阅的契约库（参数语义+实测值）
+knowledge/{domain}/
+├── SKILL.md        ← entry: decision tree + system table + hard rules + flows + verified checklist (one page)
+├── {system}/wiring.md  ← system knowledge: ≤15 lines per system (dedicated components + wiring + adjustable params)
+├── {component}/method.md ← component knowledge: ≤8 lines per component (function + wiring points + precedents)
+└── {contract}/detail.md  ← contract library read on demand (parameter semantics + measured values)
 ```
 
-**规模红线**：4 个文件、每文件 2-4K。超过 = 过度设计（见第六节#2）。
+**Size red line**: 4 files, 2-4K each. More = over-engineering (see §6 #2).
 
-**引用替代复制**：需要样例时读原始数据文件，不复制进知识包（避免膨胀 + 双份维护）。
+**Reference instead of copy**: when examples are needed, read the raw data files — don't copy them into the pack (avoids bloat + double maintenance).
 
 ---
 
-## 四、检索设计（知识要被"找到"才有用）
+## 4. Retrieval Design (knowledge is only useful if it can be found)
 
-1. **决策树放最前**：SKILL.md 顶部就是"需求→方向"的判定树（编辑/生成/引导 + 子任务）
-2. **一页定位**：入口文件读完就能确定"看哪个文件哪一节"
-3. **按需查阅**：契约/细节文件只在遇到未知项时才读
-4. **交叉引用**：体系表 ↔ 组件 ↔ 契约用章节号互链
-
----
-
-## 五、蒸馏的验证闭环
-
-蒸馏出的知识**必须能指导实际任务**才算有效：
-
-```
-用蒸馏知识做一个新任务
-  → 成功：知识有效（记录为先例）
-  → 失败：报错 → 对照契约修正 → 重跑（连续2次失败即停）
-  → 修正后的新认知 → 写回知识包（蒸馏增值）
-```
+1. **Decision tree first**: SKILL.md starts with the "need → direction" decision tree (edit/generate/guide + subtasks)
+2. **One-page orientation**: reading the entry file tells you exactly "which file, which section"
+3. **Read on demand**: contract/detail files are only read when encountering unknown items
+4. **Cross-references**: system table ↔ components ↔ contracts linked by section numbers
 
 ---
 
-## 六、蒸馏时最容易犯的错（对照自查）
+## 5. Distillation Validation Loop
 
-| # | 错误 | 正确做法 |
+Distilled knowledge **must guide real tasks** to count as valid:
+
+```
+Use distilled knowledge to do a new task
+  → success: knowledge is valid (record as precedent)
+  → failure: error → fix against the contract → re-run (stop after 2 consecutive failures)
+  → new insights after fixing → write back into the pack (distillation value-add)
+```
+
+---
+
+## 6. Most Common Distillation Mistakes (self-check)
+
+| # | Mistake | Correct approach |
 |---|---|---|
-| 1 | 把"已验证场景"写成"唯一用途" | 写"能力本质 + 已验证场景（≠唯一）"，任务不锁定体系 |
-| 2 | 过度设计：每个实体一个文件、加元数据/索引/编排层 | 极简 4 文件；索引/编排合并进 SKILL.md 一页 |
-| 3 | 复制原始数据进知识包 | 引用原文件路径，不复制（避免膨胀+双维护） |
-| 4 | 按任务分类体系（"这个模型只能做X"） | 按能力分类，标注已验证场景 |
-| 5 | 只写"怎么连"不写"什么不能连" | 铁律必须单独提炼（踩坑经验最值钱） |
-| 6 | 依赖读者推理（"显然应该…"） | 每步给判定条件，写到"笨 agent 照着做也不会错" |
+| 1 | Writing "verified scenario" as "the only use" | Write "capability essence + verified scenario (≠only)"; don't lock tasks to systems |
+| 2 | Over-engineering: one file per entity, adding metadata/index/orchestration layers | Minimal 4 files; merge index/orchestration into SKILL.md's one page |
+| 3 | Copying raw data into the pack | Reference original file paths, don't copy (avoids bloat + dual maintenance) |
+| 4 | Classifying systems by task ("this model can only do X") | Classify by capability, mark verified scenarios |
+| 5 | Only writing "how to connect", not "what must not be connected" | Hard rules must be distilled separately (pitfall experience is the most valuable) |
+| 6 | Relying on reader reasoning ("obviously...") | Give decision criteria at every step; write until "a dumb agent following along can't go wrong" |
 
 ---
 
-## 七、参考实例（本次 RunningHub 蒸馏）
+## 7. Reference Case (the RunningHub distillation)
 
-**产物**：`knowledge/runninghub-nodes/`（4 文件 20K）
-- 输入：6 个工作流 JSON（人物/场景/网格/道具/提示词/换装）
-- 蒸馏出的知识：
-  - 4 个底模体系（Qwen编辑/Z-Image/FLUX.1/FLUX.2）——按能力分类
-  - 6 个跨底模组件（网格调参/动态提示词/去重/尺寸/分流/LLM流）
-  - 7 条铁律（Lora跨体系/采样绑定/底模≠任务专用等）
-  - 节点契约（实测值优先于官方默认值）
+**Output**: `knowledge/runninghub-nodes/` (4 files, 20K)
+- Input: 6 workflow JSONs (character/scene/grid/prop/prompt/try-on)
+- Distilled knowledge:
+  - 4 base-model systems (Qwen-edit/Z-Image/FLUX.1/FLUX.2) — classified by capability
+  - 6 cross-base-model components (grid tuning / dynamic prompts / dedup / sizing / routing / LLM flow)
+  - 7 hard rules (LoRA cross-system / sampling binding / base model ≠ task-specific, etc.)
+  - Node contracts (measured values beat official defaults)
 
-**当时踩的关键坑**（已写入知识包）：
-1. 误把"已验证场景"写成"唯一用途"（用户纠正后加铁律"底模≠任务专用"）
-2. 初始做了 19 文件 184K 的膨胀结构（用户纠正后砍到 4 文件 20K）
-3. 把 ComfyUI 官方节点误标为"RunningHub 私有"（核实源码后修正来源标注）
+**Key pitfalls hit at the time** (already written into the pack):
+1. Wrote "verified scenario" as "the only use" (corrected by user; added hard rule "base model ≠ task-specific")
+2. Initially built an inflated 19-file/184K structure (cut down to 4 files/20K after user correction)
+3. Mislabeled ComfyUI official nodes as "RunningHub-private" (fixed source attribution after verifying source code)
 
-遇到新的"知识蒸馏"任务时，先读 `knowledge/runninghub-nodes/` 作为范例，再按本技能流程操作。
+When facing a new "knowledge distillation" task, first read `knowledge/runninghub-nodes/` as a reference case, then follow this skill's process.
 
-## 验证清单
+## Verification Checklist
 
-- [ ] 输入检查过了（多个成功样本、可解析、有踩坑记录）？
-- [ ] 五步法走完了（统计→拓扑→体系→组件→铁律）？
-- [ ] 体系按能力分类、标注"已验证场景≠唯一用途"？
-- [ ] 结构极简（≤4 文件，每文件 ≤4K）？
-- [ ] 原始数据只引用不复制？
-- [ ] 决策树放最前，一页能定位？
-- [ ] 铁律从踩坑中提炼（不是从文档抄）？
-- [ ] 用蒸馏知识实际跑通了一个新任务？
-- [ ] 新认知已写回知识包（蒸馏增值）？
+- [ ] Input check passed (multiple success samples, parseable, pitfall records)?
+- [ ] Five steps completed (inventory → topology → systems → components → hard rules)?
+- [ ] Systems classified by capability, marked "verified scenario ≠ only use"?
+- [ ] Structure minimal (≤4 files, each ≤4K)?
+- [ ] Raw data referenced, not copied?
+- [ ] Decision tree first, one-page orientation?
+- [ ] Hard rules distilled from pitfalls (not copied from docs)?
+- [ ] A new task actually completed using the distilled knowledge?
+- [ ] New insights written back into the pack (distillation value-add)?
