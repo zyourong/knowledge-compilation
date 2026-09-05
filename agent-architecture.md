@@ -26,7 +26,21 @@ Boundary: applies to knowledge-dense, reasoning-thin tasks; open-ended reasoning
 
 ---
 
-## 2. Why "Compilation", Not "Distillation"
+## 2. Knowledge Compilation vs Agent Skills
+
+Knowledge Compilation uses the skill format (SKILL.md + scripts, carried by harnesses like pi / Claude Code) but is **not a skill collection**:
+
+- Skills are designed for **flagship strong models** — knowledge is a "reference" the model still thinks with
+- Compiled knowledge packs are designed for **weak models** — knowledge is an "instruction"; the framework thinks for the model
+- Skills come from human-written general guides; compiled packs are **distilled from verified real-world success** (hard rules, measured values, pitfalls)
+- Skill consumption allows improvisation; compilation enforces **Follow, Don't Think**
+- Skills assume you pay for the expensive model; compilation lets you use one **10-100x cheaper**
+
+**One sentence**: a Skill gives a *capable* model less to think about; Knowledge Compilation gives an *incapable* model nothing to think about.
+
+---
+
+## 3. Why "Compilation", Not "Distillation"
 
 | | Knowledge Distillation | **Knowledge Compilation** |
 |---|---|---|
@@ -41,7 +55,7 @@ Distillation changes the model's "muscle memory"; compilation gives the model an
 
 ---
 
-## 3. Three-Layer Meta-Skill System (Distill → Package → Compile)
+## 4. Three-Layer Meta-Skill System (Distill → Package → Compile)
 
 ```
 knowledge-distillation   → Produce knowledge (thinker: analyze, verify, summarize, document pitfalls)
@@ -76,7 +90,7 @@ knowledge-compilation ★  → Consume knowledge (executor: just follow, don't t
 
 ---
 
-## 4. Knowledge Pack Structure (Compiled Knowledge Pack, Five Layers)
+## 5. Knowledge Pack Structure (Compiled Knowledge Pack, Five Layers)
 
 ```
 SKILL.md        → decision tree (direction) + hard rules (constraints) + verified checklist
@@ -100,7 +114,7 @@ Hard rules are the core of "compilation output": **write down the expert's judgm
 
 ---
 
-## 5. Relationship with the Harness
+## 6. Relationship with the Harness
 
 Knowledge Compilation is injected at **inference time** through an agent harness:
 - The harness provides the agent loop, tool protocol, and context management (infrastructure)
@@ -114,7 +128,7 @@ Layering principle:
 
 ---
 
-## 6. Validation & Evolution
+## 7. Validation & Evolution
 
 ### Decision Guidelines (When to Follow vs When to Innovate)
 
@@ -132,7 +146,7 @@ The knowledge-pack system moves toward **"more patterns → less reasoning requi
 
 ---
 
-## 7. Implementation Path
+## 8. Implementation Path
 
 1. **Distill**: extract knowledge from real practice (successful cases → decision rules → hard rules)
 2. **Package**: structure into portable knowledge packs (five-layer structure)
