@@ -83,7 +83,7 @@ nodes.md          → 实测值（参数语义、跨体系陷阱、踩坑记录�
 
 ## 创新点（组合空白）
 
-**所有零件都是公开技术**，但据调研（2025-09，GitHub 实搜验证），以下**完整闭环没有成规模的开源实现**：
+**所有零件都是公开技术**：
 
 ```
 以"成功经验"为真值逆向私有平台契约（把跑通的 JSON 当 API 文档）
@@ -109,8 +109,7 @@ knowledge-distillation/   蒸馏元技能（生产知识）
 knowledge-packaging/      打包元技能（封装知识）
 runninghub-nodes/         Compiled Knowledge Pack 示例①：RunningHub 工作流节点编辑
 runninghub-web/           Compiled Knowledge Pack 示例②：RunningHub 网页操控（含可执行脚本）
-ai-short-drama-pipeline/  应用案例：AI 短剧资产生成管线（launcher/generation/core_eval 统计评测）
-agent架构方案.md          完整架构文档（三层 + 约束罩 + 统计评判引擎）
+agent架构方案.md          知识编译架构设计文档
 ```
 
 ---
@@ -118,13 +117,13 @@ agent架构方案.md          完整架构文档（三层 + 约束罩 + 统计�
 ## 路线图
 
 - [x] 知识编译方法论 + 两个 Compiled Knowledge Pack（nodes / web）
-- [x] 统计评测体系（core_eval.py：11 指标 + 假设检验 + 网格调参分析）
-- [ ] **eval_engine**：指标向量 + bootstrap CI + 语义信号翻译层（signal/recommended_action/confidence）
 - [ ] **对照实验**：同一任务，弱模型+知识包 vs 强模型裸跑——量化"成本差 vs 质量差"
-- [ ] **参数调优闭环**：评测 → 找最优参数 → API 写回 → 重跑（评测驱动的返工自动化）
+- [ ] **统计验证框架**：用统计方法验证知识包迁移效果（知识密度 vs 推理密度 → 该不该编译）
+- [ ] **第三个 Knowledge Pack**：覆盖新领域，验证方法论的可复制性
 
 ---
 
 ## License
 
 MIT
+
