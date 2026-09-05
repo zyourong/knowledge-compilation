@@ -1,97 +1,97 @@
 ---
 name: knowledge-compilation
-description: 知识编译元技能：使用任何已验证知识包时的第一规则——"直接照做，别思考"。当 agent 要使用 runninghub-nodes / runninghub-web / 任何 distilled 知识包时，本技能定义如何正确消费知识：不重新推理、不怀疑已验证结论、不自作聪明修改已验证流程。参考实例：合并工作流时因"自作聪明"把 image1/image2 接反而踩坑。
+description: The compilation meta-skill: the first rule when using any verified knowledge pack — "Follow, Don't Think." When an agent is about to use runninghub-nodes / runninghub-web / any distilled knowledge pack, this skill defines how to consume knowledge correctly: don't re-reason, don't doubt verified conclusions, don't improvise on verified flows. Reference case: a merge workflow failed because of "cleverness" — image1/image2 were connected backwards.
 ---
 
-# Knowledge Compilation（知识编译）
+# Knowledge Compilation
 
-> **一句话**：知识包存在的意义就是让你**不用思考**。直接照做，是最高效、最正确的用法。
-> **核心原则**：知识包 = 已验证的结论。消费它时，你的唯一职责是**忠实执行**，不是重新验证。
+> **In one sentence**: a knowledge pack exists so you don't have to think. Follow it directly — that is the most efficient, most correct usage.
+> **Core principle**: a knowledge pack = verified conclusions. When consuming it, your only job is **faithful execution**, not re-verification.
 
 ---
 
-## 一、第一规则：直接用，笨一点（Follow, Don't Think）
+## 1. The First Rule: Follow, Don't Think
 
-### 为什么"笨"反而高效
+### Why "dumb" is more efficient
 
-| 行为 | 结果 |
+| Behavior | Result |
 |---|---|
-| 照做（笨） | ✅ 复现已验证的成功 |
-| 自作聪明（聪明） | ❌ 破坏已验证的流程，踩新坑 |
+| Follow (dumb) | ✅ Reproduces verified success |
+| Improvise (clever) | ❌ Breaks verified flows, hits new pitfalls |
 
-**认知反转**：一个"笨 agent 照着做不会错"的知识包，是最高质量的交付物。你的聪明应该在**生产知识包时**用（蒸馏时想清楚），不在**消费知识包时**用（执行时别多想）。
+**Cognitive inversion**: a knowledge pack that a "dumb" agent can follow without error is the highest-quality deliverable. Your intelligence belongs in **producing** knowledge packs (think clearly during distillation), not in **consuming** them (don't overthink during execution).
 
-### 消费知识包的 4 条操作准则
+### 4 consumption guidelines
 
-1. **不重新推理**：知识包说"这样连"，就这样连。不要"我觉得应该那样"
-2. **不怀疑已验证结论**：实测值优先于你的直觉/官方文档（如 AuraFlow 3.0 不是 1.73）
-3. **不自作聪明**：不要"优化"已验证流程（如把网格调参的三视图也跑起来——浪费资源）
-4. **有疑问先查包，再问用户**：包里有答案就照做；包里没有才问
+1. **Don't re-reason**: if the pack says "connect it this way," connect it that way. Don't "I think it should be..."
+2. **Don't doubt verified conclusions**: measured values beat your intuition / official docs (e.g. AuraFlow 3.0 is not 1.73)
+3. **Don't improvise**: don't "optimize" verified flows (e.g. running the three-view branch of grid tuning wastes resources)
+4. **Check the pack first, then ask the user**: follow the pack if it has the answer; only ask if it doesn't
 
-## 二、终极元技能的诞生背景（实战踩坑）
+## 2. Origin of this meta-skill (real-world pitfall)
 
-### 踩坑案例：image1/image2 接反
+### Pitfall case: image1/image2 connected backwards
 
-**场景**：合并人物+服装+换装三个工作流为一个。
+**Scenario**: merging character + clothing + try-on workflows into one.
 
-**错误行为**：
+**Wrong behavior**:
 ```
-我"自作聪明"地重新分析了原工作流 → 按原 JSON 的 slot 号接 →
-image1=服装、image2=人物 → 结果接反
-```
-
-**正确行为（照做）**：
-```
-直接读知识包 pipelines.md §5 → 铁律明确写着 image1=人物图、image2=服装图 →
-照着连 → 正确
+I "cleverly" re-analyzed the original workflows → connected by the original JSON slot numbers →
+image1=clothing, image2=character → connected backwards
 ```
 
-**教训**：知识包已经总结过的东西，**不要用"原 JSON 分析"去覆盖它**。原 JSON 是原料，知识包是成品——用成品。
-
-## 三、知识编译的消费流程（Consumption Protocol）
-
+**Correct behavior (follow)**:
 ```
-1. 识别任务类型 → 匹配对应知识包（nodes/web/packaging/distillation）
-2. 读 SKILL.md 的决策树 → 确定用哪个 pipeline/component
-3. 读对应章节 → 严格按接线/参数执行
-4. 执行中不创新：只改"可调参数"，不碰"铁律"
-5. 遇到包内没覆盖的情况 → 停下问用户（不猜）
-6. 跑通后 → 如有新认知，写回知识包（这是唯一允许的"创新"）
+Read knowledge pack pipelines.md §5 → the hard rule clearly states image1=character image, image2=clothing image →
+connect accordingly → correct
 ```
 
-### 执行 vs 蒸馏的分工（关键）
+**Lesson**: don't override conclusions already summarized in the knowledge pack with "original JSON analysis." The original JSON is the raw material; the knowledge pack is the finished product — use the finished product.
 
-| 阶段 | 你的角色 | 行为 |
+## 3. Knowledge Compilation Consumption Protocol
+
+```
+1. Identify task type → match the corresponding knowledge pack (nodes/web/packaging/distillation)
+2. Read SKILL.md's decision tree → determine which pipeline/component to use
+3. Read the corresponding section → strictly follow wiring/parameters
+4. No innovation during execution: only change "adjustable parameters", never touch "hard rules"
+5. If the pack doesn't cover a case → stop and ask the user (don't guess)
+6. After success → if there's new insight, write it back into the pack (the only allowed "innovation")
+```
+
+### Production vs consumption division (key)
+
+| Phase | Your role | Behavior |
 |---|---|---|
-| **蒸馏/生产知识** | 思考者 | 分析、验证、总结、写坑 |
-| **编译/消费知识** | 执行者 | 照做、不怀疑、只改可调项 |
+| **Distill / produce knowledge** | Thinker | Analyze, verify, summarize, document pitfalls |
+| **Compile / consume knowledge** | Executor | Follow, don't doubt, only change adjustable items |
 
-**不要在执行阶段当思考者**——这是知识编译的最大误区。
+**Don't be a thinker during execution** — this is the biggest misconception in Knowledge Compilation.
 
-## 四、判断准则（何时照做 vs 何时创新）
+## 4. Decision Guidelines (When to Follow vs When to Innovate)
 
-| 情况 | 行为 |
+| Situation | Behavior |
 |---|---|
-| 知识包有明确答案 | **照做**（100% 执行） |
-| 知识包标注"可调" | 可以改（在安全范围内） |
-| 知识包标注"铁律/勿反/勿删" | **绝对不改** |
-| 知识包没覆盖 | **问用户**（不猜、不发明） |
-| 跑通后发现新坑 | **写回知识包**（这是蒸馏，属于创新阶段） |
+| Pack has a clear answer | **Follow** (100% execution) |
+| Pack marks "adjustable" | May change (within safe range) |
+| Pack marks "hard rule / don't reverse / don't delete" | **Absolutely do not change** |
+| Pack doesn't cover it | **Ask the user** (don't guess, don't invent) |
+| New pitfall found after success | **Write it back into the pack** (this is distillation — the innovation phase) |
 
-## 五、与其它元技能的关系
+## 5. Relationship with Other Meta-Skills
 
 ```
-knowledge-distillation（蒸馏）→ 生产知识（思考者角色）
-knowledge-packaging（打包）  → 封装知识（整理者角色）
-knowledge-compilation（编译） → 消费知识（执行者角色）★ 使用知识时的第一规则
+knowledge-distillation → produce knowledge (thinker role)
+knowledge-packaging    → package knowledge (organizer role)
+knowledge-compilation  → consume knowledge (executor role) ★ first rule when using knowledge
 ```
 
-三者闭环：**蒸馏产出 → 打包封装 → 编译执行**。本技能是执行端的元技能。
+The closed loop: **distill → package → compile**. This skill is the executor-side meta-skill.
 
-## 六、验证清单（每次消费知识包后自检）
+## 6. Verification Checklist (self-check after each consumption)
 
-- [ ] 我是否直接照做了知识包的结论，而不是重新推理？
-- [ ] 我没有"优化"已验证流程？
-- [ ] 我只改了标注"可调"的参数？
-- [ ] 遇到包内没有的情况，我问了用户而不是猜？
-- [ ] 如果有新坑，我写回知识包了吗？
+- [ ] Did I follow the pack's conclusions directly instead of re-reasoning?
+- [ ] Did I NOT "optimize" verified flows?
+- [ ] Did I only change parameters marked "adjustable"?
+- [ ] When the pack didn't cover a case, did I ask the user instead of guessing?
+- [ ] If there was a new pitfall, did I write it back into the pack?
