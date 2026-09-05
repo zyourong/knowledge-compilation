@@ -121,6 +121,32 @@ See `runninghub-nodes/` (workflow node-editing knowledge pack) and `runninghub-w
 
 ---
 
+## Run It Yourself: 30-Second Demo
+
+```bash
+python demo_harness.py
+```
+
+A minimal, dependency-free harness prototype that shows the core mechanism in action:
+
+```
+🤖 weak model output: {'action': 'run_workflow', 'model_family': 'qwen_edit', 'lora_family': 'z_image'}
+🛑 [harness] hard rule [R01] triggered: LoRA/CLIP/VAE are bound to their base model; cross-system mixing is forbidden
+🔄 [harness] injecting rule [R01] into context, forcing the weak model to regenerate...
+✅ [harness] all rules passed, executing action: run_workflow
+
+📋 White-box audit log (every decision is inspectable): [...]
+```
+
+What it demonstrates:
+- **Hard rules are compiled to deterministic code** — enforced with if-else, never left to the weak model's judgment (it hallucinated, the harness caught it)
+- **Rule injection + forced retry** — a blocked action is fed the violated rule and must regenerate
+- **White-box audit log** — every decision (who was blocked, by which rule, on what output) is inspectable; no "what was the AI thinking" guessing after an incident
+
+In real engineering, `COMPILED_KNOWLEDGE_PACK` is produced by the compilation step from SKILL.md — edit the hard rules in the pack, and the harness applies them on the next run. **No retraining needed.**
+
+---
+
 ## Innovation (The Combination Gap)
 
 **All parts are public technology** — but the following end-to-end loop has no mature open-source implementation:
@@ -149,6 +175,7 @@ knowledge-distillation/    Distillation meta-skill (producing knowledge)
 knowledge-packaging/       Packaging meta-skill (packaging knowledge)
 runninghub-nodes/          Compiled Knowledge Pack ①: RunningHub workflow node editing
 runninghub-web/            Compiled Knowledge Pack ②: RunningHub web operation (with executable script)
+demo_harness.py            Minimal harness prototype: hard rules compiled to code guardrails
 agent-architecture.md      Knowledge Compilation architecture design document
 ```
 
