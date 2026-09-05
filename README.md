@@ -12,6 +12,25 @@ The model doesn't need to get smarter — **the framework thinks for it.**
 
 ---
 
+## Knowledge Compilation vs Agent Skills (clear the ambiguity first)
+
+Knowledge Compilation *uses* the skill format (SKILL.md + scripts, carried by agent harnesses like pi / Claude Code) — but it is **not a skill collection**. The difference is fundamental:
+
+| | Agent Skills (Anthropic / Claude Code) | **Knowledge Compilation** |
+|---|---|---|
+| Designed for | **Flagship strong models** (Claude, GPT) | **Open-source weak models** |
+| Role of knowledge | "Reference" — the model still thinks; the skill reduces how much it thinks | "Instruction" — the model doesn't think; the framework thinks for it |
+| Source of knowledge | Human-written general guides (how to use git, how to write tests) | **Distilled from verified real-world success** (reverse-engineered platform contracts, hard rules, measured values, pitfalls) |
+| Core content | How to use a capability | **Judgment boundaries** (decision trees + hard rules + verified checklists) |
+| Consumption philosophy | Understand and execute (model may improvise) | **Follow, Don't Think** (re-reasoning is explicitly forbidden) |
+| Economic model | Assumes you pay for the expensive flagship model | Lets you use an open-source model **10-100x cheaper** |
+
+**In one sentence**: a Skill gives a *capable* model less to think about; Knowledge Compilation gives an *incapable* model nothing to think about.
+
+A skill says "here's how to do it, figure out the details." A compiled knowledge pack says "do exactly this — the reasoning is already done for you."
+
+---
+
 ## Why "Compilation", Not "Distillation"?
 
 | | Knowledge Distillation | **Knowledge Compilation** |
